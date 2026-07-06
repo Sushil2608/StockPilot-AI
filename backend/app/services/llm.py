@@ -17,4 +17,5 @@ def get_llm() -> ChatAnthropic:
         anthropic_api_key=settings.anthropic_api_key,
         temperature=settings.model_temperature,
         max_tokens=4096,
+        max_retries=3,
     )

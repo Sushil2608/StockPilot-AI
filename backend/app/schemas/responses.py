@@ -23,6 +23,8 @@ class AgentStatus(BaseModel):
 
 class AnalysisResponse(BaseModel):
     ticker: str = Field(..., description="Stock ticker symbol")
+    market: str = Field(default="US", description="Market: US or IN")
+    currency: str = Field(default="USD", description="Currency code")
     planner: ResearchPlan | None = Field(None, description="Research plan output")
     financial: FinancialData | None = Field(None, description="Financial data output")
     news: NewsAnalysis | None = Field(None, description="News analysis output")

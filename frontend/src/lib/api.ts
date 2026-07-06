@@ -1,8 +1,11 @@
 import type {
   AgentStatus,
   AnalysisResponse,
+  ChartPeriod,
   FinancialData,
+  MarketType,
   NewsAnalysis,
+  PriceHistoryResponse,
   TechnicalIndicators,
   ResearchPlan,
   InvestmentReport,
@@ -22,13 +25,14 @@ export type StreamEvent =
 
 export async function streamAnalysis(
   ticker: string,
+  market: MarketType,
   onEvent: (event: StreamEvent) => void,
   signal?: AbortSignal
 ): Promise<void> {
   const response = await fetch(`${API_BASE}/analyze/stream`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ticker }),
+    body: JSON.stringify({ ticker, market }),
     signal,
   });
 
@@ -67,4 +71,19 @@ export async function streamAnalysis(
       }
     }
   }
+}
+
+export async function fetchPriceHistory(
+  ticker: string,
+  period: ChartPeriod,
+  market: MarketType
+): Promise<PriceHistoryResponse> {
+  const params = new URLSearchParams({ period, market });
+  const response = await fetch(
+    `${API_BASE}/price-history/${ticker}?${params}`
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to fetch price history: ${response.statusText}`);
+  }
+  return response.json();
 }

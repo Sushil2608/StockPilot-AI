@@ -36,3 +36,9 @@ class InvestmentReport(BaseModel):
         le=1.0,
         description="Confidence score from 0.0 to 1.0",
     )
+    target_price: float | None = Field(None, description="12-month price target")
+    target_upside: float | None = Field(None, description="Upside/downside to target as percentage")
+    target_methodology: str = Field(
+        default="",
+        description="Brief explanation of how the target was derived",
+    )
