@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-os.environ.setdefault("OPENAI_API_KEY", "test-key")
+os.environ.setdefault("GOOGLE_API_KEY", "test-key")
 
 from app.agents.financial import FinancialAgent
 

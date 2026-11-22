@@ -3,7 +3,7 @@ import os
 import pytest
 import numpy as np
 
-os.environ.setdefault("OPENAI_API_KEY", "test-key")
+os.environ.setdefault("GOOGLE_API_KEY", "test-key")
 
 from app.agents.technical import TechnicalAgent
 

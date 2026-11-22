@@ -16,8 +16,9 @@ class Settings(BaseSettings):
 
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None
-    llm_provider: Literal["anthropic", "openai"] = "openai"
-    model_name: str = "gpt-4o"
+    google_api_key: str | None = None
+    llm_provider: Literal["anthropic", "openai", "gemini"] = "gemini"
+    model_name: str | None = None
     model_temperature: float = 0.3
     analysis_timeout_seconds: int = 180
     ticker_validation_timeout_seconds: int = 15

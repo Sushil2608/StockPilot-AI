@@ -9,6 +9,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![LangChain](https://img.shields.io/badge/LangChain-1.x-1C3C3C?style=flat&logo=langchain&logoColor=white)](https://langchain.com)
 [![LangGraph](https://img.shields.io/badge/LangGraph-1.x-FF6F00?style=flat)](https://langchain-ai.github.io/langgraph/)
+[![Gemini](https://img.shields.io/badge/Gemini-Google-4285F4?style=flat&logo=googlegemini&logoColor=white)](https://ai.google.dev/gemini-api)
 [![Claude](https://img.shields.io/badge/Claude-Anthropic-D97757?style=flat)](https://anthropic.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -90,7 +91,7 @@ Supports both **US (NYSE/NASDAQ)** and **Indian (NSE)** markets.
                         │   │   └──────────────────────┘           │   │
                         │   └──────────────────────────────────────┘   │
                         │                                              │
-                        │   Data: yfinance · LLM: OpenAI/Claude · TA │
+                        │   Data: yfinance · LLM: Gemini/OpenAI/Claude │
                         └──────────────────────────────────────────────┘
 ```
 
@@ -104,7 +105,7 @@ Supports both **US (NYSE/NASDAQ)** and **Indian (NSE)** markets.
 |:------|:-----------|
 | **Frontend** | Next.js 16, TypeScript, Tailwind CSS, shadcn/ui, Recharts, Framer Motion |
 | **Backend** | Python 3.12, FastAPI, Pydantic, asyncio |
-| **AI / LLM** | LangChain, LangGraph, OpenAI GPT-4o or Anthropic Claude |
+| **AI / LLM** | LangChain, LangGraph, Gemini, OpenAI, or Anthropic |
 | **Finance Data** | yfinance, pandas, numpy, ta-lib |
 | **Streaming** | Server-Sent Events (SSE) via sse-starlette |
 | **Deployment** | Vercel (frontend and Python Functions), Docker Compose |
@@ -166,7 +167,7 @@ stockpilot-ai/
 
 - **Python 3.12+**
 - **Node.js 18+**
-- An API key for OpenAI or Anthropic
+- An API key for Gemini, OpenAI, or Anthropic
 
 ### 1. Clone & Configure
 
@@ -175,8 +176,8 @@ git clone https://github.com/Sushil2608/StockPilot-AI.git
 cd StockPilot-AI
 
 cp .env.example .env
-# Add your OpenAI key to OPENAI_API_KEY. To use Anthropic instead, set
-# LLM_PROVIDER=anthropic and add ANTHROPIC_API_KEY.
+# Add your Gemini key to GOOGLE_API_KEY. To use another provider, set
+# LLM_PROVIDER=openai or anthropic and add the corresponding API key.
 ```
 
 ### 2. Run Locally
@@ -229,11 +230,12 @@ This repository is a monorepo with separate frontend and backend directories. Cr
 
    | Name | Value |
    |:-----|:------|
-   | `LLM_PROVIDER` | `openai` or `anthropic` (defaults to `openai`) |
+   | `LLM_PROVIDER` | `gemini`, `openai`, or `anthropic` (defaults to `gemini`) |
+   | `GOOGLE_API_KEY` | Required when using Gemini; add as a Vercel secret |
    | `OPENAI_API_KEY` | Required when using OpenAI; add as a Vercel secret |
    | `ANTHROPIC_API_KEY` | Required when using Anthropic |
    | `CORS_ORIGINS` | The frontend production URL, such as `https://stockpilot-web.vercel.app` |
-   | `MODEL_NAME` | Defaults to `gpt-4o`; use a model available to the selected provider |
+   | `MODEL_NAME` | Defaults to `gemini-3.5-flash-lite` for Gemini; use a model available to the selected provider |
    | `MODEL_TEMPERATURE` | Optional; defaults to `0.3` |
    | `ANALYSIS_TIMEOUT_SECONDS` | Optional; defaults to `180` seconds |
    | `TICKER_VALIDATION_TIMEOUT_SECONDS` | Optional; defaults to `15` seconds |
@@ -241,7 +243,7 @@ This repository is a monorepo with separate frontend and backend directories. Cr
    | `ANALYSIS_RATE_LIMIT_WINDOW_SECONDS` | Optional; defaults to `600` seconds |
    | `LOG_LEVEL` | Optional; defaults to `INFO` |
 
-   OpenAI and Anthropic are called directly using their official APIs. The selected model must support tool calling and structured outputs because the research agents rely on them. If you use a custom frontend domain too, set `CORS_ORIGINS` to a comma-separated list of both origins. Do not add a trailing slash to an origin.
+   Gemini, OpenAI, and Anthropic are called directly using their official APIs. The selected model must support function calling and structured outputs because the research agents rely on them. Google currently lists Gemini 3.5 Flash-Lite on its free tier, subject to model availability and account-specific rate limits; check [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing) for current terms. If you use a custom frontend domain too, set `CORS_ORIGINS` to a comma-separated list of both origins. Do not add a trailing slash to an origin.
 
 4. Deploy and check `https://<your-backend-domain>/health`. It should return a healthy status.
 
@@ -255,7 +257,7 @@ The backend streams agent progress while analyzing a ticker. Analyses have a 180
 
 ### Public repository and secrets
 
-Commit source code, lockfiles, `requirements.txt`, tests, `.env.example`, Vercel configuration, README, and license. Keep the real `.env` and API keys out of Git. Anyone cloning the repo needs their own OpenAI or Anthropic key and should add it to local environment settings or hosting provider secrets.
+Commit source code, lockfiles, `requirements.txt`, tests, `.env.example`, Vercel configuration, README, and license. Keep the real `.env` and API keys out of Git. Anyone cloning the repo needs their own Gemini, OpenAI, or Anthropic key and should add it to local environment settings or hosting provider secrets.
 
 ---
 
@@ -263,10 +265,11 @@ Commit source code, lockfiles, `requirements.txt`, tests, `.env.example`, Vercel
 
 | Variable | Required | Default | Description |
 |:---------|:--------:|:--------|:------------|
-| `LLM_PROVIDER` | No | `openai` | `openai` or `anthropic` |
+| `LLM_PROVIDER` | No | `gemini` | `gemini`, `openai`, or `anthropic` |
+| `GOOGLE_API_KEY` | For Gemini | — | Gemini Developer API key from Google AI Studio |
 | `OPENAI_API_KEY` | For OpenAI | — | OpenAI API key |
 | `ANTHROPIC_API_KEY` | For Anthropic | — | Anthropic API key |
-| `MODEL_NAME` | No | `gpt-4o` | Model ID available to the selected provider |
+| `MODEL_NAME` | No | `gemini-3.5-flash-lite` | Model ID available to the selected provider |
 | `MODEL_TEMPERATURE` | No | `0.3` | LLM temperature (0.0–1.0) |
 | `ANALYSIS_TIMEOUT_SECONDS` | No | `180` | Maximum duration of one analysis |
 | `TICKER_VALIDATION_TIMEOUT_SECONDS` | No | `15` | Maximum duration for ticker and price-history lookups |
@@ -480,6 +483,6 @@ MIT — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-Built with LangChain, LangGraph, OpenAI, and Claude · [GitHub](https://github.com/Sushil2608/StockPilot-AI)
+Built with LangChain, LangGraph, Gemini, OpenAI, and Claude · [GitHub](https://github.com/Sushil2608/StockPilot-AI)
 
 </div>
