@@ -231,6 +231,7 @@ This repository is a monorepo with separate frontend and backend directories. Cr
    |:-----|:------|
    | `LLM_PROVIDER` | `anthropic` or `openai_compatible` |
    | `ANTHROPIC_API_KEY` | Required when using Anthropic |
+   | `ANTHROPIC_BASE_URL` | Set to your Anthropic-compatible proxy URL when using one |
    | `AI_PROXY_API_KEY` | Required when using an OpenAI-compatible proxy; add as a Vercel secret |
    | `AI_PROXY_BASE_URL` | Proxy's OpenAI-compatible API base URL, such as `https://proxy.example/v1` |
    | `OPENAI_USE_RESPONSES_API` | Optional; set `true` only if the proxy/model uses the Responses API |
@@ -263,6 +264,7 @@ Commit source code, lockfiles, `requirements.txt`, tests, `.env.example`, Vercel
 |:---------|:--------:|:--------|:------------|
 | `LLM_PROVIDER` | No | `anthropic` | `anthropic` or `openai_compatible` |
 | `ANTHROPIC_API_KEY` | For Anthropic | — | Anthropic API key; `AI_PROXY_API_KEY` can be used with an Anthropic-compatible proxy |
+| `ANTHROPIC_BASE_URL` | No | Anthropic default | Base URL for an Anthropic-compatible proxy |
 | `AI_PROXY_API_KEY` | For proxy | — | Secret key for an OpenAI-compatible AI proxy |
 | `AI_PROXY_BASE_URL` | No | Provider default | OpenAI-compatible or Anthropic-compatible proxy base URL |
 | `OPENAI_USE_RESPONSES_API` | No | `false` | Use Responses API for OpenAI-compatible provider when supported |

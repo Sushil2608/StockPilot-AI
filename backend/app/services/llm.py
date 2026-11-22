@@ -34,8 +34,9 @@ def get_llm() -> BaseChatModel:
             "max_tokens": 4096,
             "max_retries": 3,
         }
-        if settings.ai_proxy_base_url:
-            kwargs["base_url"] = settings.ai_proxy_base_url
+        base_url = settings.anthropic_base_url or settings.ai_proxy_base_url
+        if base_url:
+            kwargs["base_url"] = base_url
         return ChatAnthropic(**kwargs)
 
     if not settings.ai_proxy_api_key:

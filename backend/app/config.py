@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     )
 
     anthropic_api_key: str | None = None
+    anthropic_base_url: str | None = None
     ai_proxy_api_key: str | None = None
     ai_proxy_base_url: str | None = None
     llm_provider: Literal["anthropic", "openai_compatible"] = "anthropic"
