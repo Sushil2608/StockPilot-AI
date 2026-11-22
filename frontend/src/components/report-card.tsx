@@ -33,16 +33,16 @@ export function ReportCard({ data, currency = "USD" }: ReportCardProps) {
     >
       <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
         <CardHeader className="pb-4">
-          <div className="flex items-start justify-between">
-            <div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
               <h3 className="text-sm font-medium text-muted-foreground">
                 Investment Report
               </h3>
-              <p className="text-lg font-bold mt-0.5">
+              <p className="mt-0.5 break-words text-base font-bold sm:text-lg">
                 {data.company_name} ({data.ticker})
               </p>
             </div>
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-row items-center justify-between gap-3 sm:flex-col sm:items-end">
               <Badge variant="secondary" className={`text-sm px-3 py-1 ${recStyle}`}>
                 {data.recommendation}
               </Badge>
@@ -64,7 +64,7 @@ export function ReportCard({ data, currency = "USD" }: ReportCardProps) {
         </CardHeader>
         <CardContent className="space-y-5">
           {hasTarget && (
-            <div className="flex items-center gap-4 p-3 rounded-lg bg-background/50 border border-border/30">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 p-3 rounded-lg bg-background/50 border border-border/30">
               <div className="flex items-center gap-2">
                 <Target className="h-4 w-4 text-primary" />
                 <span className="text-xs text-muted-foreground">12M Target</span>
@@ -86,7 +86,7 @@ export function ReportCard({ data, currency = "USD" }: ReportCardProps) {
             </div>
           )}
 
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="break-words text-sm leading-relaxed text-muted-foreground">
             {data.summary}
           </p>
 
@@ -135,7 +135,7 @@ function Section({
       <p className={`text-xs font-medium ${titleColor} mb-2`}>{title}</p>
       <ul className="space-y-1.5">
         {items.map((item, i) => (
-          <li key={i} className="flex gap-2 text-xs text-muted-foreground leading-relaxed">
+          <li key={i} className="flex gap-2 break-words text-xs text-muted-foreground leading-relaxed">
             <span className={`mt-1.5 h-1 w-1 shrink-0 rounded-full ${dotColor}`} />
             {item}
           </li>

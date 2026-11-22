@@ -167,7 +167,9 @@ async def _stream_analysis(ticker: str, market: Market) -> AsyncGenerator[dict, 
                     status = AgentStatus(
                         agent=display_name,
                         status=AgentStatusEnum.ERROR if agent_had_error else AgentStatusEnum.COMPLETED,
-                        message=errors.get(node_name, ""),
+                        message="This step could not be completed. Please try again."
+                        if agent_had_error
+                        else "",
                     )
                     yield {"event": "agent_status", "data": status.model_dump_json()}
 

@@ -123,14 +123,14 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main className="container mx-auto max-w-5xl flex flex-col gap-8 px-4 py-12">
+      <main className="container mx-auto max-w-5xl flex flex-col gap-6 px-4 py-8 sm:gap-8 sm:py-12">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="flex flex-col items-center gap-4"
         >
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
               Stock Research
             </h1>
             <p className="text-sm text-muted-foreground">

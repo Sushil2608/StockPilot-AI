@@ -27,8 +27,8 @@ export function SearchBar({ onAnalyze, isLoading }: SearchBarProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 w-full max-w-lg items-center">
-      <div className="flex rounded-lg border border-border/50 bg-card overflow-hidden">
+    <form onSubmit={handleSubmit} className="grid w-full max-w-lg grid-cols-[auto_minmax(0,1fr)] gap-2 sm:flex sm:items-center">
+      <div className="flex w-fit rounded-lg border border-border/50 bg-card overflow-hidden">
         <button
           type="button"
           onClick={() => setMarket("US")}
@@ -62,13 +62,13 @@ export function SearchBar({ onAnalyze, isLoading }: SearchBarProps) {
           maxLength={15}
           pattern="[A-Z0-9][A-Z0-9.&-]*"
           title="Enter a ticker using up to 15 letters, numbers, dots, ampersands, or hyphens."
-          className="pl-9 h-11 bg-card border-border/50 font-mono text-sm tracking-wider"
+          className="h-11 min-w-0 bg-card pl-9 font-mono text-sm tracking-wider"
         />
       </div>
       <Button
         type="submit"
         disabled={isLoading || !ticker.trim()}
-        className="h-11 px-6"
+        className="col-span-2 h-11 w-full px-6 sm:col-span-1 sm:w-auto"
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />

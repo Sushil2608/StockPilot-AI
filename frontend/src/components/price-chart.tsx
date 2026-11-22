@@ -123,13 +123,13 @@ export function PriceChart({
                 </span>
               )}
             </div>
-            <div className="flex gap-1">
-              <div className="flex rounded-md border border-border/50 overflow-hidden mr-2">
+            <div className="flex flex-wrap gap-2 sm:justify-end">
+              <div className="flex rounded-md border border-border/50 overflow-hidden">
                 {CHART_TYPES.map((ct) => (
                   <button
                     key={ct.value}
                     onClick={() => setChartType(ct.value)}
-                    className={`px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                    className={`px-2 py-1 text-[10px] font-medium transition-colors sm:px-2.5 sm:text-[11px] ${
                       chartType === ct.value
                         ? "bg-primary/20 text-primary"
                         : "text-muted-foreground hover:text-foreground"
@@ -144,7 +144,7 @@ export function PriceChart({
                   <button
                     key={p.value}
                     onClick={() => setPeriod(p.value)}
-                    className={`px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                    className={`px-2 py-1 text-[10px] font-medium transition-colors sm:px-2.5 sm:text-[11px] ${
                       period === p.value
                         ? "bg-primary/20 text-primary"
                         : "text-muted-foreground hover:text-foreground"

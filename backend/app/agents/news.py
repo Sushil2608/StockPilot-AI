@@ -6,6 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.language_models.chat_models import BaseChatModel
 
 from app.schemas import NewsAnalysis, NewsItem
+from app.services.model_retry import invoke_with_model_retry
 
 logger = logging.getLogger(__name__)
 
@@ -70,10 +71,13 @@ class NewsAgent:
             for a in articles
         ]
 
-        result = await self.chain.ainvoke({
-            "ticker": ticker,
-            "news_text": news_text,
-        })
+        result = await invoke_with_model_retry(
+            lambda: self.chain.ainvoke({
+                "ticker": ticker,
+                "news_text": news_text,
+            }),
+            operation_name="news analysis",
+        )
         result.ticker = ticker
         result.evidence = evidence
         logger.info(

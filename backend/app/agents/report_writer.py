@@ -11,6 +11,7 @@ from app.schemas import (
     NewsAnalysis,
     TechnicalIndicators,
 )
+from app.services.model_retry import invoke_with_model_retry
 
 logger = logging.getLogger(__name__)
 
@@ -243,7 +244,10 @@ class ReportWriterAgent:
         }
         messages = await REPORT_PROMPT.ainvoke(prompt_input)
 
-        response = await self.llm_with_tools.ainvoke(messages)
+        response = await invoke_with_model_retry(
+            lambda: self.llm_with_tools.ainvoke(messages),
+            operation_name="report tools",
+        )
 
         tool_results = []
         for tool_call in response.tool_calls:
@@ -264,9 +268,15 @@ class ReportWriterAgent:
                     "and a brief methodology explanation in your response."
                 )
             )
-            result = await self.llm_structured.ainvoke(followup_messages)
+            result = await invoke_with_model_retry(
+                lambda: self.llm_structured.ainvoke(followup_messages),
+                operation_name="report writing",
+            )
         else:
-            result = await self.llm_structured.ainvoke(messages)
+            result = await invoke_with_model_retry(
+                lambda: self.llm_structured.ainvoke(messages),
+                operation_name="report writing",
+            )
 
         result.ticker = ticker
         result.company_name = financial.company_name

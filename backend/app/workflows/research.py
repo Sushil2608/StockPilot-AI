@@ -130,7 +130,8 @@ def build_research_graph(llm: BaseChatModel) -> StateGraph:
         except Exception as e:
             logger.error("Report writer failed for %s: %s", ticker, e)
             fallback = InvestmentReport(
-                ticker=ticker, summary=f"Report generation failed: {e}",
+                ticker=ticker,
+                summary="Report generation is temporarily unavailable. Please try again shortly.",
                 recommendation="Hold", confidence_score=0.0,
             )
             return {

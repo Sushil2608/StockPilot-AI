@@ -4,6 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.language_models.chat_models import BaseChatModel
 
 from app.schemas import ResearchPlan
+from app.services.model_retry import invoke_with_model_retry
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,10 @@ class PlannerAgent:
 
     async def run(self, ticker: str) -> ResearchPlan:
         logger.info("Planner agent starting for ticker=%s", ticker)
-        result = await self.chain.ainvoke({"ticker": ticker})
+        result = await invoke_with_model_retry(
+            lambda: self.chain.ainvoke({"ticker": ticker}),
+            operation_name="planner",
+        )
         logger.info(
             "Planner agent completed: %d steps planned", len(result.steps)
         )
