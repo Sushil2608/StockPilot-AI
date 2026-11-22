@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -13,9 +14,13 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    anthropic_api_key: str
+    anthropic_api_key: str | None = None
+    ai_proxy_api_key: str | None = None
+    ai_proxy_base_url: str | None = None
+    llm_provider: Literal["anthropic", "openai_compatible"] = "anthropic"
     model_name: str = "claude-sonnet-4-6"
     model_temperature: float = 0.3
+    openai_use_responses_api: bool = False
     cors_origins: str = ""
 
     app_name: str = "StockPilot AI"

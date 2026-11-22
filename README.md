@@ -90,7 +90,7 @@ Supports both **US (NYSE/NASDAQ)** and **Indian (NSE)** markets.
                         │   │   └──────────────────────┘           │   │
                         │   └──────────────────────────────────────┘   │
                         │                                              │
-                        │   Data: yfinance · LLM: Claude · TA: ta-lib │
+                        │   Data: yfinance · LLM: Claude/Codex · TA │
                         └──────────────────────────────────────────────┘
 ```
 
@@ -104,7 +104,7 @@ Supports both **US (NYSE/NASDAQ)** and **Indian (NSE)** markets.
 |:------|:-----------|
 | **Frontend** | Next.js 16, TypeScript, Tailwind CSS, shadcn/ui, Recharts, Framer Motion |
 | **Backend** | Python 3.12, FastAPI, Pydantic, asyncio |
-| **AI / LLM** | LangChain, LangGraph, Claude (Anthropic API) |
+| **AI / LLM** | LangChain, LangGraph, Anthropic Claude or OpenAI-compatible models (including Codex through a supported proxy) |
 | **Finance Data** | yfinance, pandas, numpy, ta-lib |
 | **Streaming** | Server-Sent Events (SSE) via sse-starlette |
 | **Deployment** | Vercel (frontend and Python Functions), Docker Compose |
@@ -119,7 +119,7 @@ stockpilot-ai/
 ├── backend/
 │   ├── app/
 │   │   ├── agents/
-│   │   │   ├── planner.py           # Research plan via Claude
+│   │   │   ├── planner.py           # Research plan via configured LLM
 │   │   │   ├── financial.py         # yfinance data + Piotroski F-Score
 │   │   │   ├── news.py              # News fetch + LLM sentiment analysis
 │   │   │   ├── technical.py         # ta-lib indicators + composite score (0-100)
@@ -128,7 +128,7 @@ stockpilot-ai/
 │   │   │   └── research.py          # LangGraph StateGraph, parallel fan-out
 │   │   ├── schemas/                 # Pydantic models for every agent I/O
 │   │   ├── services/
-│   │   │   ├── llm.py               # ChatAnthropic factory with retry
+│   │   │   ├── llm.py               # Provider-selectable LLM factory with retry
 │   │   │   └── ticker.py            # Ticker validation service
 │   │   ├── api/
 │   │   │   └── routes.py            # REST + SSE endpoints, price history
@@ -166,7 +166,7 @@ stockpilot-ai/
 
 - **Python 3.12+**
 - **Node.js 18+**
-- **Anthropic API key** — [Get one here](https://console.anthropic.com/)
+- An API key for the selected LLM provider: Anthropic, or an OpenAI-compatible AI proxy (for Codex, use a proxy/model that supports tool calls and structured output)
 
 ### 1. Clone & Configure
 
@@ -175,7 +175,8 @@ git clone https://github.com/Sushil2608/StockPilot-AI.git
 cd StockPilot-AI
 
 cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
+# Keep LLM_PROVIDER=anthropic and add ANTHROPIC_API_KEY, or configure
+# LLM_PROVIDER=openai_compatible with your proxy key, URL, and model ID.
 ```
 
 ### 2. Run Locally
@@ -228,13 +229,17 @@ This repository is a monorepo with separate frontend and backend directories. Cr
 
    | Name | Value |
    |:-----|:------|
-   | `ANTHROPIC_API_KEY` | Your Anthropic API key |
+   | `LLM_PROVIDER` | `anthropic` or `openai_compatible` |
+   | `ANTHROPIC_API_KEY` | Required when using Anthropic |
+   | `AI_PROXY_API_KEY` | Required when using an OpenAI-compatible proxy; add as a Vercel secret |
+   | `AI_PROXY_BASE_URL` | Proxy's OpenAI-compatible API base URL, such as `https://proxy.example/v1` |
+   | `OPENAI_USE_RESPONSES_API` | Optional; set `true` only if the proxy/model uses the Responses API |
    | `CORS_ORIGINS` | The frontend production URL, such as `https://stockpilot-web.vercel.app` |
-   | `MODEL_NAME` | Optional; defaults to `claude-sonnet-4-6` |
+   | `MODEL_NAME` | Anthropic defaults to `claude-sonnet-4-6`; for a proxy, use the exact model ID it provides |
    | `MODEL_TEMPERATURE` | Optional; defaults to `0.3` |
    | `LOG_LEVEL` | Optional; defaults to `INFO` |
 
-   If you use a custom frontend domain too, set `CORS_ORIGINS` to a comma-separated list of both origins. Do not add a trailing slash to an origin.
+   For Codex through an OpenAI-compatible proxy, set `LLM_PROVIDER=openai_compatible`, `AI_PROXY_API_KEY`, `AI_PROXY_BASE_URL`, and `MODEL_NAME` to the proxy's values. `OPENAI_USE_RESPONSES_API` defaults to `false` for Chat Completions-compatible proxies. Set it to `true` only when the proxy exposes the Responses API for that model. The model/proxy must support tool calling and structured outputs because the research agents rely on them. If you use a custom frontend domain too, set `CORS_ORIGINS` to a comma-separated list of both origins. Do not add a trailing slash to an origin.
 
 4. Deploy and check `https://<your-backend-domain>/health`. It should return a healthy status.
 
@@ -244,11 +249,11 @@ This repository is a monorepo with separate frontend and backend directories. Cr
 2. Redeploy the frontend. `NEXT_PUBLIC_API_URL` is embedded during the frontend build, so a redeploy is needed after changing it.
 3. Try loading price history and running an analysis. The browser sends API requests directly to the backend, and the backend allows the configured frontend origin through CORS.
 
-The backend streams agent progress while analyzing a ticker. `backend/vercel.json` requests a 300-second function duration; the Vercel plan must allow that setting. If it does not, lower `maxDuration` to the plan's allowed value, but analyses may time out. Try a full analysis after deployment and check the function logs if it stops early. Large Python dependencies can also make deployment builds slower. An unrestricted public endpoint can use your Anthropic quota, so consider usage limits before sharing the live app widely.
+The backend streams agent progress while analyzing a ticker. `backend/vercel.json` requests a 300-second function duration; the Vercel plan must allow that setting. If it does not, lower `maxDuration` to the plan's allowed value, but analyses may time out. Try a full analysis after deployment and check the function logs if it stops early. Large Python dependencies can also make deployment builds slower. An unrestricted public endpoint can use your configured LLM provider's quota, so consider usage limits before sharing the live app widely.
 
 ### Public repository and secrets
 
-Commit source code, lockfiles, `requirements.txt`, tests, `.env.example`, Vercel configuration, README, and license. Keep the real `.env` and API keys out of Git. Anyone cloning the repo needs to create their own Anthropic API key and add it to their local `.env` or hosting provider's secret settings.
+Commit source code, lockfiles, `requirements.txt`, tests, `.env.example`, Vercel configuration, README, and license. Keep the real `.env` and API keys out of Git. Anyone cloning the repo needs their own key from Anthropic or their selected AI proxy and should add it to local environment settings or hosting provider secrets.
 
 ---
 
@@ -256,8 +261,12 @@ Commit source code, lockfiles, `requirements.txt`, tests, `.env.example`, Vercel
 
 | Variable | Required | Default | Description |
 |:---------|:--------:|:--------|:------------|
-| `ANTHROPIC_API_KEY` | **Yes** | — | Your Anthropic API key |
-| `MODEL_NAME` | No | `claude-sonnet-4-6` | Claude model to use |
+| `LLM_PROVIDER` | No | `anthropic` | `anthropic` or `openai_compatible` |
+| `ANTHROPIC_API_KEY` | For Anthropic | — | Anthropic API key; `AI_PROXY_API_KEY` can be used with an Anthropic-compatible proxy |
+| `AI_PROXY_API_KEY` | For proxy | — | Secret key for an OpenAI-compatible AI proxy |
+| `AI_PROXY_BASE_URL` | No | Provider default | OpenAI-compatible or Anthropic-compatible proxy base URL |
+| `OPENAI_USE_RESPONSES_API` | No | `false` | Use Responses API for OpenAI-compatible provider when supported |
+| `MODEL_NAME` | No | `claude-sonnet-4-6` | Provider model ID; use the proxy's exact model ID in proxy mode |
 | `MODEL_TEMPERATURE` | No | `0.3` | LLM temperature (0.0–1.0) |
 | `CORS_ORIGINS` | No | Localhost origins | Comma-separated browser origins allowed to call the backend |
 | `LOG_LEVEL` | No | `INFO` | Logging level |
@@ -467,6 +476,6 @@ MIT — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-Built with LangChain, LangGraph, and Claude · [GitHub](https://github.com/Sushil2608/StockPilot-AI)
+Built with LangChain, LangGraph, Claude, and Codex-compatible models · [GitHub](https://github.com/Sushil2608/StockPilot-AI)
 
 </div>

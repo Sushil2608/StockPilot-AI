@@ -1,9 +1,9 @@
 import logging
 
 from langchain_core.messages import HumanMessage, ToolMessage
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import tool
-from langchain_anthropic import ChatAnthropic
 
 from app.schemas import (
     FinancialData,
@@ -218,9 +218,11 @@ ANALYSIS_TOOLS = [calculate_valuation, assess_risk_level, compute_price_target]
 
 
 class ReportWriterAgent:
-    def __init__(self, llm: ChatAnthropic) -> None:
+    def __init__(self, llm: BaseChatModel) -> None:
         self.llm_with_tools = llm.bind_tools(ANALYSIS_TOOLS)
-        self.llm_structured = llm.with_structured_output(InvestmentReport)
+        self.llm_structured = llm.with_structured_output(
+            InvestmentReport, method="function_calling"
+        )
 
     async def run(
         self,

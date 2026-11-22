@@ -1,7 +1,7 @@
 import logging
 
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_anthropic import ChatAnthropic
+from langchain_core.language_models.chat_models import BaseChatModel
 
 from app.schemas import ResearchPlan
 
@@ -23,8 +23,10 @@ PLANNER_PROMPT = ChatPromptTemplate.from_messages([
 
 
 class PlannerAgent:
-    def __init__(self, llm: ChatAnthropic) -> None:
-        self.chain = PLANNER_PROMPT | llm.with_structured_output(ResearchPlan)
+    def __init__(self, llm: BaseChatModel) -> None:
+        self.chain = PLANNER_PROMPT | llm.with_structured_output(
+            ResearchPlan, method="function_calling"
+        )
 
     async def run(self, ticker: str) -> ResearchPlan:
         logger.info("Planner agent starting for ticker=%s", ticker)

@@ -2,7 +2,7 @@ import logging
 
 import yfinance as yf
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_anthropic import ChatAnthropic
+from langchain_core.language_models.chat_models import BaseChatModel
 
 from app.schemas import NewsAnalysis, NewsItem
 
@@ -38,9 +38,9 @@ def _extract_article(raw: dict) -> dict:
 
 
 class NewsAgent:
-    def __init__(self, llm: ChatAnthropic) -> None:
+    def __init__(self, llm: BaseChatModel) -> None:
         self.chain = NEWS_ANALYSIS_PROMPT | llm.with_structured_output(
-            NewsAnalysis
+            NewsAnalysis, method="function_calling"
         )
 
     async def run(self, ticker: str) -> NewsAnalysis:

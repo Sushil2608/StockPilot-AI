@@ -1,7 +1,7 @@
 import logging
 from typing import TypedDict
 
-from langchain_anthropic import ChatAnthropic
+from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import StateGraph, START, END
 
 from app.agents import (
@@ -48,7 +48,7 @@ def _merge_errors(existing: dict[str, str], new: dict[str, str]) -> dict[str, st
     return merged
 
 
-def build_research_graph(llm: ChatAnthropic) -> StateGraph:
+def build_research_graph(llm: BaseChatModel) -> StateGraph:
     planner_agent = PlannerAgent(llm)
     financial_agent = FinancialAgent()
     news_agent = NewsAgent(llm)
@@ -159,7 +159,7 @@ def build_research_graph(llm: ChatAnthropic) -> StateGraph:
 
 
 async def run_research(
-    llm: ChatAnthropic, ticker: str, market: Market
+    llm: BaseChatModel, ticker: str, market: Market
 ) -> AnalysisResponse:
     config = MARKET_CONFIG[market]
     yf_ticker = f"{ticker}{config['suffix']}"
