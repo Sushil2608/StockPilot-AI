@@ -134,8 +134,8 @@ stockpilot-ai/
 │   │   │   └── routes.py            # REST + SSE endpoints, price history
 │   │   ├── config.py                # Pydantic Settings
 │   │   └── main.py                  # FastAPI app
-│   ├── api/index.py                 # Vercel Python Function entry point
-│   ├── vercel.json                  # Vercel API route rewrite
+│   ├── index.py                     # Vercel FastAPI entry point
+│   ├── vercel.json                  # Vercel function duration settings
 │   ├── tests/                       # pytest suite (22 tests)
 │   ├── requirements.txt
 │   └── Dockerfile
@@ -224,7 +224,7 @@ This repository is a monorepo with separate frontend and backend directories. Cr
 ### 2. Deploy the backend
 
 1. Import the same GitHub repository again as a second Vercel project.
-2. Set **Root Directory** to `backend`. Vercel uses `requirements.txt` to install Python dependencies and `api/index.py` to expose the existing FastAPI application as a Python Function. `vercel.json` routes API requests to that function; no Uvicorn start command is used on Vercel.
+2. Set **Root Directory** to `backend`. Vercel uses `requirements.txt` to install Python dependencies and `index.py` to expose the FastAPI application. No Uvicorn start command or route rewrite is needed on Vercel.
 3. In the backend project's **Settings → Environment Variables**, add:
 
    | Name | Value |
