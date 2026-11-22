@@ -5,7 +5,7 @@
 ### An Agentic AI-powered Stock Research Assistant
 
 [![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
-[![Next.js](https://img.shields.io/badge/Next.js-15-000000?style=flat&logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat&logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![LangChain](https://img.shields.io/badge/LangChain-1.x-1C3C3C?style=flat&logo=langchain&logoColor=white)](https://langchain.com)
 [![LangGraph](https://img.shields.io/badge/LangGraph-1.x-FF6F00?style=flat)](https://langchain-ai.github.io/langgraph/)
@@ -57,7 +57,7 @@ Supports both **US (NYSE/NASDAQ)** and **Indian (NSE)** markets.
 
 ```
                         ┌──────────────────────────────────────────────┐
-                        │           Frontend (Next.js 15)              │
+                        │           Frontend (Next.js 16)              │
                         │  Market Selector → Ticker → Live Progress    │
                         │  Area/Line/Candle Chart · Period Toggles     │
                         └─────────────────┬────────────────────────────┘
@@ -102,12 +102,12 @@ Supports both **US (NYSE/NASDAQ)** and **Indian (NSE)** markets.
 
 | Layer | Technology |
 |:------|:-----------|
-| **Frontend** | Next.js 15, TypeScript, Tailwind CSS, shadcn/ui, Recharts, Framer Motion |
+| **Frontend** | Next.js 16, TypeScript, Tailwind CSS, shadcn/ui, Recharts, Framer Motion |
 | **Backend** | Python 3.12, FastAPI, Pydantic, asyncio |
 | **AI / LLM** | LangChain, LangGraph, Claude (Anthropic API) |
 | **Finance Data** | yfinance, pandas, numpy, ta-lib |
 | **Streaming** | Server-Sent Events (SSE) via sse-starlette |
-| **Deployment** | Docker, docker-compose |
+| **Deployment** | Vercel (frontend and Python Functions), Docker Compose |
 | **Testing** | pytest, pytest-asyncio |
 
 ---
@@ -134,6 +134,8 @@ stockpilot-ai/
 │   │   │   └── routes.py            # REST + SSE endpoints, price history
 │   │   ├── config.py                # Pydantic Settings
 │   │   └── main.py                  # FastAPI app
+│   ├── api/index.py                 # Vercel Python Function entry point
+│   ├── vercel.json                  # Vercel API route rewrite
 │   ├── tests/                       # pytest suite (22 tests)
 │   ├── requirements.txt
 │   └── Dockerfile
@@ -208,6 +210,48 @@ Backend on `http://localhost:8000` · Frontend on `http://localhost:3000`
 
 ---
 
+## Deploy Both Parts on Vercel
+
+This repository is a monorepo with separate frontend and backend directories. Create **two Vercel projects from the same GitHub repository** so each part builds from its own root directory.
+
+### 1. Deploy the frontend
+
+1. In Vercel, choose **Add New → Project** and import this repository.
+2. Set **Root Directory** to `frontend` and keep the detected Next.js framework and build settings.
+3. Deploy, then copy the site's production URL (for example, `https://stockpilot-web.vercel.app`). The page will load, but API features won't work until the backend is connected.
+
+### 2. Deploy the backend
+
+1. Import the same GitHub repository again as a second Vercel project.
+2. Set **Root Directory** to `backend`. Vercel uses `requirements.txt` to install Python dependencies and `api/index.py` to expose the existing FastAPI application as a Python Function. `vercel.json` routes API requests to that function; no Uvicorn start command is used on Vercel.
+3. In the backend project's **Settings → Environment Variables**, add:
+
+   | Name | Value |
+   |:-----|:------|
+   | `ANTHROPIC_API_KEY` | Your Anthropic API key |
+   | `CORS_ORIGINS` | The frontend production URL, such as `https://stockpilot-web.vercel.app` |
+   | `MODEL_NAME` | Optional; defaults to `claude-sonnet-4-6` |
+   | `MODEL_TEMPERATURE` | Optional; defaults to `0.3` |
+   | `LOG_LEVEL` | Optional; defaults to `INFO` |
+
+   If you use a custom frontend domain too, set `CORS_ORIGINS` to a comma-separated list of both origins. Do not add a trailing slash to an origin.
+
+4. Deploy and check `https://<your-backend-domain>/health`. It should return a healthy status.
+
+### 3. Connect and redeploy the frontend
+
+1. In the frontend project's **Settings → Environment Variables**, add `NEXT_PUBLIC_API_URL` with the backend's production URL, for example `https://stockpilot-api.vercel.app` (no trailing slash).
+2. Redeploy the frontend. `NEXT_PUBLIC_API_URL` is embedded during the frontend build, so a redeploy is needed after changing it.
+3. Try loading price history and running an analysis. The browser sends API requests directly to the backend, and the backend allows the configured frontend origin through CORS.
+
+The backend streams agent progress while analyzing a ticker. `backend/vercel.json` requests a 300-second function duration; the Vercel plan must allow that setting. If it does not, lower `maxDuration` to the plan's allowed value, but analyses may time out. Try a full analysis after deployment and check the function logs if it stops early. Large Python dependencies can also make deployment builds slower. An unrestricted public endpoint can use your Anthropic quota, so consider usage limits before sharing the live app widely.
+
+### Public repository and secrets
+
+Commit source code, lockfiles, `requirements.txt`, tests, `.env.example`, Vercel configuration, README, and license. Keep the real `.env` and API keys out of Git. Anyone cloning the repo needs to create their own Anthropic API key and add it to their local `.env` or hosting provider's secret settings.
+
+---
+
 ## Environment Variables
 
 | Variable | Required | Default | Description |
@@ -215,6 +259,7 @@ Backend on `http://localhost:8000` · Frontend on `http://localhost:3000`
 | `ANTHROPIC_API_KEY` | **Yes** | — | Your Anthropic API key |
 | `MODEL_NAME` | No | `claude-sonnet-4-6` | Claude model to use |
 | `MODEL_TEMPERATURE` | No | `0.3` | LLM temperature (0.0–1.0) |
+| `CORS_ORIGINS` | No | Localhost origins | Comma-separated browser origins allowed to call the backend |
 | `LOG_LEVEL` | No | `INFO` | Logging level |
 | `BACKEND_PORT` | No | `8000` | Backend server port |
 | `FRONTEND_PORT` | No | `3000` | Frontend server port |

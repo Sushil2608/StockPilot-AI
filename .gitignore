@@ -43,5 +43,8 @@ out/
 # Docker
 docker-compose.override.yml
 
+# Vercel project metadata
+.vercel/
+
 # Logs
 *.log

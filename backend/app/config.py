@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     anthropic_api_key: str
     model_name: str = "claude-sonnet-4-6"
     model_temperature: float = 0.3
+    cors_origins: str = ""
 
     app_name: str = "StockPilot AI"
     app_version: str = "0.1.0"
