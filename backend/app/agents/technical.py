@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import numpy as np
@@ -192,8 +193,7 @@ class TechnicalAgent:
         return "neutral"
 
     async def _fetch_history(self, ticker: str) -> pd.DataFrame:
-        stock = yf.Ticker(ticker)
-        return stock.history(period="1y")
+        return await asyncio.to_thread(_fetch_history_sync, ticker)
 
     def _safe_float(self, value: object) -> float | None:
         try:
@@ -270,3 +270,7 @@ class TechnicalAgent:
                 volume=round(float(row.get("Volume", 0))),
             ))
         return points
+
+
+def _fetch_history_sync(ticker: str) -> pd.DataFrame:
+    return yf.Ticker(ticker).history(period="1y")

@@ -15,13 +15,14 @@ class Settings(BaseSettings):
     )
 
     anthropic_api_key: str | None = None
-    anthropic_base_url: str | None = None
-    ai_proxy_api_key: str | None = None
-    ai_proxy_base_url: str | None = None
-    llm_provider: Literal["anthropic", "openai_compatible"] = "anthropic"
-    model_name: str = "claude-sonnet-4-6"
+    openai_api_key: str | None = None
+    llm_provider: Literal["anthropic", "openai"] = "openai"
+    model_name: str = "gpt-4o"
     model_temperature: float = 0.3
-    openai_use_responses_api: bool = False
+    analysis_timeout_seconds: int = 180
+    ticker_validation_timeout_seconds: int = 15
+    analysis_rate_limit_count: int = 5
+    analysis_rate_limit_window_seconds: int = 600
     cors_origins: str = ""
 
     app_name: str = "StockPilot AI"

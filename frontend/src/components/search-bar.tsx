@@ -59,6 +59,9 @@ export function SearchBar({ onAnalyze, isLoading }: SearchBarProps) {
           value={ticker}
           onChange={(e) => setTicker(e.target.value.toUpperCase())}
           disabled={isLoading}
+          maxLength={15}
+          pattern="[A-Z0-9][A-Z0-9.&-]*"
+          title="Enter a ticker using up to 15 letters, numbers, dots, ampersands, or hyphens."
           className="pl-9 h-11 bg-card border-border/50 font-mono text-sm tracking-wider"
         />
       </div>

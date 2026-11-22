@@ -79,6 +79,9 @@ export default function Home() {
           if (event.data.technical) setTechnical(event.data.technical);
           if (event.data.report) setReport(event.data.report);
           break;
+        case "error":
+          setError(event.data);
+          break;
       }
     },
     [updateStep]

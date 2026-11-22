@@ -3,7 +3,7 @@ import os
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
+os.environ.setdefault("OPENAI_API_KEY", "test-key")
 
 from app.main import app
 

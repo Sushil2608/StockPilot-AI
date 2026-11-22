@@ -37,7 +37,14 @@ export async function streamAnalysis(
   });
 
   if (!response.ok) {
-    throw new Error(`Analysis failed: ${response.statusText}`);
+    let detail = response.statusText;
+    try {
+      const body = await response.json();
+      if (typeof body.detail === "string") detail = body.detail;
+    } catch {
+      // Fall back to the HTTP status text if the error body is not JSON.
+    }
+    throw new Error(`Analysis failed: ${detail}`);
   }
 
   const reader = response.body?.getReader();

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import yfinance as yf
@@ -16,16 +17,21 @@ def _safe_row(df: pd.DataFrame, label: str) -> pd.Series | None:
         return None
 
 
+def _fetch_financial_data(
+    ticker: str,
+) -> tuple[dict, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    stock = yf.Ticker(ticker)
+    return stock.info, stock.income_stmt, stock.balance_sheet, stock.cashflow
+
+
 class FinancialAgent:
     async def run(
         self, ticker: str, market: str = "US", currency: str = "USD"
     ) -> FinancialData:
         logger.info("Financial agent starting for ticker=%s market=%s", ticker, market)
-        stock = yf.Ticker(ticker)
-        info = stock.info
-        income_stmt = stock.income_stmt
-        balance_sheet = stock.balance_sheet
-        cashflow = stock.cashflow
+        info, income_stmt, balance_sheet, cashflow = await asyncio.to_thread(
+            _fetch_financial_data, ticker
+        )
 
         fcf = self._extract_free_cash_flow(info, cashflow)
         roe = self._compute_roe(info)

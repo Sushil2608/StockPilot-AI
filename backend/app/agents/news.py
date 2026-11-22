@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import yfinance as yf
@@ -81,11 +82,14 @@ class NewsAgent:
         return result
 
     async def _fetch_news(self, ticker: str) -> list[dict]:
-        stock = yf.Ticker(ticker)
-        return stock.news or []
+        return await asyncio.to_thread(_fetch_news_sync, ticker)
 
     def _format_articles(self, articles: list[dict]) -> str:
         lines: list[str] = []
         for i, article in enumerate(articles, 1):
             lines.append(f"{i}. [{article['publisher']}] {article['title']}")
         return "\n".join(lines)
+
+
+def _fetch_news_sync(ticker: str) -> list[dict]:
+    return yf.Ticker(ticker).news or []

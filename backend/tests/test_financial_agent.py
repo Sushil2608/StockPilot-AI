@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
+os.environ.setdefault("OPENAI_API_KEY", "test-key")
 
 from app.agents.financial import FinancialAgent
 
