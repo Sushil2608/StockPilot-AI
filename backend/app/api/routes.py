@@ -129,16 +129,25 @@ async def analyze_stream(request: Request, body: AnalysisRequest) -> EventSource
 
 
 async def _stream_analysis(ticker: str, market: Market) -> AsyncGenerator[dict, None]:
-    llm = get_llm()
-    config = MARKET_CONFIG[market]
-    yf_ticker = f"{ticker}{config['suffix']}"
-
-    graph = build_research_graph(llm)
-    compiled = graph.compile()
-
-    accumulated_state: dict = {"ticker": ticker, "market": market.value, "currency": config["currency"]}
-
     try:
+        yield {
+            "event": "agent_status",
+            "data": AgentStatus(
+                agent="Planner", status=AgentStatusEnum.RUNNING
+            ).model_dump_json(),
+        }
+
+        llm = get_llm()
+        config = MARKET_CONFIG[market]
+        yf_ticker = f"{ticker}{config['suffix']}"
+        graph = build_research_graph(llm)
+        compiled = graph.compile()
+        accumulated_state: dict = {
+            "ticker": ticker,
+            "market": market.value,
+            "currency": config["currency"],
+        }
+
         async with asyncio.timeout(settings.analysis_timeout_seconds):
             async for chunk in compiled.astream(
                 {"ticker": ticker, "market": market.value, "yf_ticker": yf_ticker, "currency": config["currency"], "errors": {}},
@@ -176,6 +185,15 @@ async def _stream_analysis(ticker: str, market: Market) -> AsyncGenerator[dict, 
         yield {
             "event": "error",
             "data": json.dumps("The analysis timed out. Please try again later."),
+        }
+        return
+    except Exception:
+        logger.exception("Streaming analysis failed for ticker=%s", ticker)
+        yield {
+            "event": "error",
+            "data": json.dumps(
+                "Analysis failed. Check the backend logs for details."
+            ),
         }
         return
 

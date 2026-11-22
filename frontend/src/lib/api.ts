@@ -52,6 +52,8 @@ export async function streamAnalysis(
 
   const decoder = new TextDecoder();
   let buffer = "";
+  let currentEvent = "";
+  let receivedTerminalEvent = false;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -61,8 +63,6 @@ export async function streamAnalysis(
     const lines = buffer.split("\n");
     buffer = lines.pop() || "";
 
-    let currentEvent = "";
-
     for (const line of lines) {
       if (line.startsWith("event:")) {
         currentEvent = line.slice(6).trim();
@@ -71,12 +71,19 @@ export async function streamAnalysis(
         try {
           const parsed = JSON.parse(rawData);
           onEvent({ type: currentEvent, data: parsed } as StreamEvent);
+          if (currentEvent === "complete" || currentEvent === "error") {
+            receivedTerminalEvent = true;
+          }
         } catch {
           // skip malformed data
         }
         currentEvent = "";
       }
     }
+  }
+
+  if (!receivedTerminalEvent) {
+    throw new Error("The analysis stream ended before results were received.");
   }
 }
 
