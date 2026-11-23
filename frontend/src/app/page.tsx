@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { LayoutGroup, motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/navbar";
 import { SearchBar } from "@/components/search-bar";
 import { ProgressTracker } from "@/components/progress-tracker";
@@ -45,12 +45,54 @@ export default function Home() {
   const [currentTicker, setCurrentTicker] = useState("");
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!report) return;
+
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "auto"
+      : "smooth";
+    reportRef.current?.scrollIntoView({ behavior, block: "start" });
+  }, [report]);
 
   const updateStep = useCallback(
     (name: string, status: AgentStatusValue) => {
-      setSteps((prev) =>
-        prev.map((s) => (s.name === name ? { ...s, status } : s))
-      );
+      setSteps((prev) => {
+        let next = prev.map((step) =>
+          step.name === name ? { ...step, status } : step
+        );
+
+        if (name === "Planner" && status === "completed") {
+          next = next.map((step) =>
+            ["Financial Agent", "News Agent", "Technical Agent"].includes(step.name)
+              ? { ...step, status: "running" }
+              : step
+          );
+        }
+
+        const parallelAgentsFinished = [
+          "Financial Agent",
+          "News Agent",
+          "Technical Agent",
+        ].every((agentName) =>
+          next.some(
+            (step) =>
+              step.name === agentName &&
+              (step.status === "completed" || step.status === "error")
+          )
+        );
+
+        if (parallelAgentsFinished) {
+          next = next.map((step) =>
+            step.name === "Report Writer" && step.status === "pending"
+              ? { ...step, status: "running" }
+              : step
+          );
+        }
+
+        return next;
+      });
     },
     []
   );
@@ -156,25 +198,32 @@ export default function Home() {
         <ProgressTracker steps={steps} />
 
         {hasResults && (
-          <div className="space-y-6">
-            {financial && <FinancialCard data={financial} />}
+          <LayoutGroup>
+            <motion.div layout className="space-y-6">
+              {report && (
+                <div ref={reportRef} className="scroll-mt-20">
+                  <ReportCard data={report} currency={currency} />
+                </div>
+              )}
 
-            {technical && technical.price_history.length > 0 && (
-              <PriceChart
-                initialData={technical.price_history}
-                ticker={currentTicker}
-                currency={currency}
-                market={currentMarket}
-              />
-            )}
+              {financial && <FinancialCard data={financial} />}
 
-            <div className="grid gap-6 md:grid-cols-2">
-              {news && <NewsCard data={news} />}
-              {technical && <TechnicalCard data={technical} currency={currency} />}
-            </div>
+              {technical && technical.price_history.length > 0 && (
+                <PriceChart
+                  initialData={technical.price_history}
+                  ticker={currentTicker}
+                  currency={currency}
+                  market={currentMarket}
+                />
+              )}
 
-            {report && <ReportCard data={report} currency={currency} />}
-          </div>
+              <motion.div layout className="grid gap-6 md:grid-cols-2">
+                {news && <NewsCard data={news} />}
+                {technical && <TechnicalCard data={technical} currency={currency} />}
+              </motion.div>
+
+            </motion.div>
+          </LayoutGroup>
         )}
 
         {!hasResults && !isLoading && (

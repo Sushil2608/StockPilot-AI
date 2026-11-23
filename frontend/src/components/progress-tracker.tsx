@@ -28,12 +28,22 @@ const STATUS_COLOR: Record<AgentStatusValue, string> = {
   error: "text-red-400",
 };
 
+const MOBILE_NAME: Record<string, string> = {
+  "Financial Agent": "Financials",
+  "News Agent": "News",
+  "Technical Agent": "Technicals",
+  "Report Writer": "Report",
+};
+
 export function ProgressTracker({ steps }: ProgressTrackerProps) {
   const allPending = steps.every((s) => s.status === "pending");
   const allDone = steps.every(
     (s) => s.status === "completed" || s.status === "error"
   );
-  const completedCount = steps.filter((s) => s.status === "completed").length;
+  const finishedCount = steps.filter(
+    (s) => s.status === "completed" || s.status === "error"
+  ).length;
+  const runningSteps = steps.filter((s) => s.status === "running");
   const startTime = useRef<number | null>(null);
   const elapsedRef = useRef<HTMLSpanElement>(null);
 
@@ -60,6 +70,7 @@ export function ProgressTracker({ steps }: ProgressTrackerProps) {
         {steps.map((step, i) => (
           <div key={step.name} className="flex items-center">
             <motion.div
+              layout
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: i * 0.05 }}
@@ -74,6 +85,7 @@ export function ProgressTracker({ steps }: ProgressTrackerProps) {
               }`}
             >
               {STATUS_ICON[step.status]}
+              <span className="sm:hidden">{MOBILE_NAME[step.name] || step.name}</span>
               <span className="hidden sm:inline">{step.name}</span>
             </motion.div>
             {i < steps.length - 1 && (
@@ -91,12 +103,17 @@ export function ProgressTracker({ steps }: ProgressTrackerProps) {
       <div className="text-[11px] text-muted-foreground">
         {allDone ? (
           <span>
-            {completedCount}/{steps.length} completed in{" "}
+            {finishedCount}/{steps.length} steps finished in{" "}
             <span ref={elapsedRef} className="font-mono" />
           </span>
         ) : (
           <span className="animate-pulse">
-            {completedCount}/{steps.length} completed
+            {runningSteps.length > 0 && (
+              <>
+                Running {runningSteps.map((step) => MOBILE_NAME[step.name] || step.name).join(", ")} ·{" "}
+              </>
+            )}
+            {finishedCount}/{steps.length} steps finished
           </span>
         )}
       </div>

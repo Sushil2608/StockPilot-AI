@@ -64,10 +64,10 @@ Supports both **US (NYSE/NASDAQ)** and **Indian (NSE)** markets.
                         └─────────────────┬────────────────────────────┘
                                           │ SSE / REST
                         ┌─────────────────▼────────────────────────────┐
-                        │            FastAPI Backend                    │
+                        │            FastAPI Backend                   │
                         │                                              │
                         │   ┌──────────────────────────────────────┐   │
-                        │   │        LangGraph Workflow             │   │
+                        │   │        LangGraph Workflow            │   │
                         │   │                                      │   │
                         │   │         ┌──────────┐                 │   │
                         │   │         │ Planner  │                 │   │
@@ -83,11 +83,11 @@ Supports both **US (NYSE/NASDAQ)** and **Indian (NSE)** markets.
                         │   │     └────────┼─────────┘             │   │
                         │   │              ▼                       │   │
                         │   │   ┌──────────────────────┐           │   │
-                        │   │   │    Report Writer      │           │   │
-                        │   │   │  3 LangChain Tools:   │           │   │
-                        │   │   │  · Valuation          │           │   │
-                        │   │   │  · Risk Assessment    │           │   │
-                        │   │   │  · Price Target       │           │   │
+                        │   │   │    Report Writer      │          │   │
+                        │   │   │  3 LangChain Tools:   │          │   │
+                        │   │   │  · Valuation          │          │   │
+                        │   │   │  · Risk Assessment    │          │   │
+                        │   │   │  · Price Target       │          │   │
                         │   │   └──────────────────────┘           │   │
                         │   └──────────────────────────────────────┘   │
                         │                                              │
