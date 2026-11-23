@@ -1,5 +1,6 @@
 import os
 
+import pandas as pd
 import pytest
 
 os.environ.setdefault("GOOGLE_API_KEY", "test-key")
@@ -53,3 +54,30 @@ def test_compute_dividend_yield(agent: FinancialAgent):
 
 def test_compute_dividend_yield_none(agent: FinancialAgent):
     assert agent._compute_dividend_yield({}) is None
+
+
+@pytest.mark.parametrize(
+    ("latest_assets", "expected_score", "expected_detail"),
+    [
+        (210, 1, "Current ratio improving YoY"),
+        (190, 0, "Current ratio not improving YoY"),
+    ],
+)
+def test_piotroski_current_ratio_uses_year_over_year_change(
+    agent: FinancialAgent,
+    latest_assets: int,
+    expected_score: int,
+    expected_detail: str,
+):
+    balance_sheet = pd.DataFrame(
+        [[latest_assets, 200], [100, 100]],
+        index=["Current Assets", "Current Liabilities"],
+        columns=["2025-12-31", "2024-12-31"],
+    )
+
+    score, details = agent._compute_piotroski(
+        {"currentRatio": 2.0}, pd.DataFrame(), balance_sheet, pd.DataFrame()
+    )
+
+    assert score == expected_score
+    assert expected_detail in details

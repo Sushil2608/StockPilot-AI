@@ -144,12 +144,25 @@ class FinancialAgent:
             details.append("Cannot compute leverage trend")
 
         # 6. Current ratio improving
-        cr_curr = info.get("currentRatio")
-        if cr_curr is not None:
-            score += 1 if cr_curr >= 1.0 else 0
-            details.append(f"Current ratio: {cr_curr:.2f}" + (" (healthy)" if cr_curr >= 1.0 else " (below 1)"))
+        current_assets_row = _safe_row(balance_sheet, "Current Assets")
+        current_liabilities_row = _safe_row(balance_sheet, "Current Liabilities")
+        if current_assets_row is not None and current_liabilities_row is not None:
+            current_ratio_row = (
+                current_assets_row
+                .div(current_liabilities_row.where(current_liabilities_row > 0))
+                .dropna()
+                .sort_index(ascending=False)
+            )
+            if len(current_ratio_row) >= 2:
+                if current_ratio_row.iloc[0] > current_ratio_row.iloc[1]:
+                    score += 1
+                    details.append("Current ratio improving YoY")
+                else:
+                    details.append("Current ratio not improving YoY")
+            else:
+                details.append("Cannot compute current ratio trend")
         else:
-            details.append("Current ratio unavailable")
+            details.append("Cannot compute current ratio trend")
 
         # 7. No share dilution
         shares_row = _safe_row(balance_sheet, "Share Issued")

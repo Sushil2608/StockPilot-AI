@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { fetchPriceHistory } from "@/lib/api";
@@ -57,29 +57,29 @@ export function PriceChart({
   const [chartType, setChartType] = useState<ChartType>("area");
   const [data, setData] = useState<PricePoint[]>(initialData);
   const [loading, setLoading] = useState(false);
+  const requestIdRef = useRef(0);
 
   const loadData = useCallback(
     async (p: ChartPeriod) => {
-      if (p === "1mo" && initialData.length > 0) {
+      if (p === "1mo") {
+        requestIdRef.current += 1;
         setData(initialData);
+        setLoading(false);
         return;
       }
+      const requestId = ++requestIdRef.current;
       setLoading(true);
       try {
         const res = await fetchPriceHistory(ticker, p, market);
-        setData(res.data);
+        if (requestId === requestIdRef.current) setData(res.data);
       } catch {
         // keep current data on error
       } finally {
-        setLoading(false);
+        if (requestId === requestIdRef.current) setLoading(false);
       }
     },
     [ticker, market, initialData]
   );
-
-  useEffect(() => {
-    if (period !== "1mo") loadData(period);
-  }, [period, loadData]);
 
   if (data.length === 0) return null;
 
@@ -143,7 +143,10 @@ export function PriceChart({
                 {PERIODS.map((p) => (
                   <button
                     key={p.value}
-                    onClick={() => setPeriod(p.value)}
+                    onClick={() => {
+                      setPeriod(p.value);
+                      void loadData(p.value);
+                    }}
                     className={`px-2 py-1 text-[10px] font-medium transition-colors sm:px-2.5 sm:text-[11px] ${
                       period === p.value
                         ? "bg-primary/20 text-primary"

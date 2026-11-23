@@ -170,7 +170,7 @@ export default function Home() {
 
             <div className="grid gap-6 md:grid-cols-2">
               {news && <NewsCard data={news} />}
-              {technical && <TechnicalCard data={technical} />}
+              {technical && <TechnicalCard data={technical} currency={currency} />}
             </div>
 
             {report && <ReportCard data={report} currency={currency} />}

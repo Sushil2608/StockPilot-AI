@@ -82,7 +82,7 @@ export function FinancialCard({ data }: FinancialCardProps) {
               <div className="flex items-center justify-between mb-2">
                 <IndicatorInfo
                   label="Piotroski F-Score"
-                  description="A score from 0 to 9 based on nine accounting checks for profitability, leverage, and operating efficiency. Higher scores indicate stronger financial signals in the latest reports; it does not predict future returns."
+                  description="A score from 0 to 9 based on nine accounting checks for profitability, liquidity, leverage, and operating efficiency. Higher scores indicate stronger financial signals in the latest reports; it does not predict future returns."
                 />
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-bold font-mono">{data.piotroski_score}/9</span>

@@ -106,7 +106,7 @@ Supports both **US (NYSE/NASDAQ)** and **Indian (NSE)** markets.
 | **Frontend** | Next.js 16, TypeScript, Tailwind CSS, shadcn/ui, Recharts, Framer Motion |
 | **Backend** | Python 3.12, FastAPI, Pydantic, asyncio |
 | **AI / LLM** | LangChain, LangGraph, Gemini, OpenAI, or Anthropic |
-| **Finance Data** | yfinance, pandas, numpy, ta-lib |
+| **Finance Data** | yfinance, pandas, numpy, ta |
 | **Streaming** | Server-Sent Events (SSE) via sse-starlette |
 | **Deployment** | Vercel (frontend and Python Functions), Docker Compose |
 | **Testing** | pytest, pytest-asyncio |
@@ -123,13 +123,14 @@ stockpilot-ai/
 │   │   │   ├── planner.py           # Research plan via configured LLM
 │   │   │   ├── financial.py         # yfinance data + Piotroski F-Score
 │   │   │   ├── news.py              # News fetch + LLM sentiment analysis
-│   │   │   ├── technical.py         # ta-lib indicators + composite score (0-100)
+│   │   │   ├── technical.py         # ta indicators + composite score (0-100)
 │   │   │   └── report_writer.py     # Synthesis with 3 LangChain tools + price target
 │   │   ├── workflows/
 │   │   │   └── research.py          # LangGraph StateGraph, parallel fan-out
 │   │   ├── schemas/                 # Pydantic models for every agent I/O
 │   │   ├── services/
-│   │   │   ├── llm.py               # Provider-selectable LLM factory with retry
+│   │   │   ├── llm.py               # Provider-selectable LLM factory
+│   │   │   ├── model_retry.py       # Retry temporary model overloads
 │   │   │   └── ticker.py            # Ticker validation service
 │   │   ├── api/
 │   │   │   └── routes.py            # REST + SSE endpoints, price history
@@ -147,6 +148,7 @@ stockpilot-ai/
 │   │   │   ├── price-chart.tsx      # Area/Line/Candle + period selector
 │   │   │   ├── financial-card.tsx   # Metrics + F-Score visualization
 │   │   │   ├── technical-card.tsx   # Indicators + score progress bar
+│   │   │   ├── indicator-info.tsx   # Inline explanations for metrics
 │   │   │   ├── report-card.tsx      # Report + price target display
 │   │   │   ├── news-card.tsx        # Sentiment + clickable sources
 │   │   │   ├── search-bar.tsx       # Ticker input + US/IN market toggle
@@ -166,7 +168,7 @@ stockpilot-ai/
 ### Prerequisites
 
 - **Python 3.12+**
-- **Node.js 18+**
+- **Node.js 20.9+**
 - An API key for Gemini, OpenAI, or Anthropic
 
 ### 1. Clone & Configure
@@ -243,7 +245,7 @@ This repository is a monorepo with separate frontend and backend directories. Cr
    | `ANALYSIS_RATE_LIMIT_WINDOW_SECONDS` | Optional; defaults to `600` seconds |
    | `LOG_LEVEL` | Optional; defaults to `INFO` |
 
-   Gemini, OpenAI, and Anthropic are called directly using their official APIs. The selected model must support function calling and structured outputs because the research agents rely on them. Google currently lists Gemini 3.5 Flash-Lite on its free tier, subject to model availability and account-specific rate limits; check [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing) for current terms. If you use a custom frontend domain too, set `CORS_ORIGINS` to a comma-separated list of both origins. Do not add a trailing slash to an origin.
+   Gemini, OpenAI, and Anthropic are called directly using their official APIs. The selected model must support function calling and structured outputs because the research agents rely on them. Free-tier models and quotas vary by account and can change; verify the selected model and current terms with the provider. See [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing) for Google's current terms. If you use a custom frontend domain too, set `CORS_ORIGINS` to a comma-separated list of both origins. Do not add a trailing slash to an origin.
 
 4. Deploy and check `https://<your-backend-domain>/health`. It should return a healthy status.
 
@@ -400,7 +402,7 @@ curl -X POST http://localhost:8000/analyze \
 | Dimension | Criteria |
 |:----------|:---------|
 | **Profitability** | Positive ROA, Positive OCF, Rising ROA, Cash > Accrual earnings |
-| **Leverage & Liquidity** | Declining leverage, Current ratio ≥ 1, No share dilution |
+| **Leverage & Liquidity** | Declining leverage, Improving current ratio, No share dilution |
 | **Efficiency** | Rising gross margin, Rising asset turnover |
 
 **Signal mapping:** 8-9 → Strong · 6-7 → Healthy · 4-5 → Neutral · 2-3 → Weak · 0-1 → Distressed
@@ -440,19 +442,8 @@ source venv/bin/activate
 pytest tests/ -v
 ```
 
-```
-tests/test_financial_agent.py   9 tests  ✓  ROE, margins, D/E, dividends
-tests/test_health.py            4 tests  ✓  API endpoints and validation
-tests/test_technical_agent.py   9 tests  ✓  Scoring, signals, edge cases
-
-22 passed
-```
-
----
-
-## Screenshots
-
-> Screenshots coming soon — run the app locally to see the dashboard in action.
+The suite currently covers 24 cases across the financial agent (11), API
+validation and health endpoints (4), and technical scoring (9).
 
 ---
 

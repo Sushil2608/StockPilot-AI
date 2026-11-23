@@ -25,6 +25,15 @@ const SENTIMENT_CONFIG = {
   },
 };
 
+function isSafeExternalUrl(value: string): boolean {
+  try {
+    const protocol = new URL(value).protocol;
+    return protocol === "https:" || protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 export function NewsCard({ data }: NewsCardProps) {
   const sentiment = data.overall_sentiment.toLowerCase();
   const config =
@@ -85,7 +94,7 @@ export function NewsCard({ data }: NewsCardProps) {
               <ul className="space-y-1">
                 {data.evidence.slice(0, 5).map((item, i) => (
                   <li key={i}>
-                    {item.url ? (
+                    {isSafeExternalUrl(item.url) ? (
                       <a
                         href={item.url}
                         target="_blank"

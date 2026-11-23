@@ -9,6 +9,7 @@ import { formatNumber } from "@/lib/format";
 
 interface TechnicalCardProps {
   data: TechnicalIndicators;
+  currency: string;
 }
 
 function Indicator({
@@ -50,7 +51,8 @@ function formatVolume(v: number | null): string {
   return v.toFixed(0);
 }
 
-export function TechnicalCard({ data }: TechnicalCardProps) {
+export function TechnicalCard({ data, currency }: TechnicalCardProps) {
+  const currencySymbol = currency === "INR" ? "₹" : "$";
   const trendClass =
     data.trend === "bullish"
       ? "text-emerald-400 bg-emerald-400/10 hover:bg-emerald-400/10"
@@ -135,17 +137,17 @@ export function TechnicalCard({ data }: TechnicalCardProps) {
           <div className="grid grid-cols-3 gap-x-2 gap-y-3 sm:gap-x-4">
             <Indicator
               label="EMA 20"
-              value={data.ema_20 !== null ? `$${formatNumber(data.ema_20)}` : "—"}
+              value={data.ema_20 !== null ? `${currencySymbol}${formatNumber(data.ema_20)}` : "—"}
               description="The 20-day Exponential Moving Average gives more weight to recent closing prices. Comparing price with this average can show short-term direction, but crossings are not guarantees of future moves."
             />
             <Indicator
               label="SMA 50"
-              value={data.sma_50 !== null ? `$${formatNumber(data.sma_50)}` : "—"}
+              value={data.sma_50 !== null ? `${currencySymbol}${formatNumber(data.sma_50)}` : "—"}
               description="The 50-day Simple Moving Average is the average closing price over the latest 50 trading days. It is a medium-term trend reference; prices above or below it can change quickly."
             />
             <Indicator
               label="SMA 200"
-              value={data.sma_200 !== null ? `$${formatNumber(data.sma_200)}` : "—"}
+              value={data.sma_200 !== null ? `${currencySymbol}${formatNumber(data.sma_200)}` : "—"}
               description="The 200-day Simple Moving Average is the average closing price over the latest 200 trading days. It is commonly used as a long-term trend reference, not as a standalone buy or sell signal."
             />
           </div>
@@ -155,17 +157,17 @@ export function TechnicalCard({ data }: TechnicalCardProps) {
           <div className="grid grid-cols-3 gap-x-2 gap-y-3 sm:gap-x-4">
             <Indicator
               label="BB Upper"
-              value={data.bollinger_upper !== null ? `$${formatNumber(data.bollinger_upper)}` : "—"}
+              value={data.bollinger_upper !== null ? `${currencySymbol}${formatNumber(data.bollinger_upper)}` : "—"}
               description="The upper Bollinger Band is typically two standard deviations above the 20-day average. The bands widen as recent volatility rises; reaching the upper band alone does not mean a reversal is due."
             />
             <Indicator
               label="BB Mid"
-              value={data.bollinger_middle !== null ? `$${formatNumber(data.bollinger_middle)}` : "—"}
+              value={data.bollinger_middle !== null ? `${currencySymbol}${formatNumber(data.bollinger_middle)}` : "—"}
               description="The middle Bollinger Band is the 20-day Simple Moving Average. It is the center line for the upper and lower bands and can serve as a short-term trend reference."
             />
             <Indicator
               label="BB Lower"
-              value={data.bollinger_lower !== null ? `$${formatNumber(data.bollinger_lower)}` : "—"}
+              value={data.bollinger_lower !== null ? `${currencySymbol}${formatNumber(data.bollinger_lower)}` : "—"}
               description="The lower Bollinger Band is typically two standard deviations below the 20-day average. It reflects the recent price range; touching it does not guarantee a bounce."
             />
           </div>

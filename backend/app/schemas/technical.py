@@ -45,7 +45,7 @@ class TechnicalIndicators(BaseModel):
         default=50,
         ge=0,
         le=100,
-        description="Composite technical score (0-100): 80+ Strong Buy, 60-79 Buy, 40-59 Neutral, 20-39 Sell, 0-19 Strong Sell",
+        description="Composite technical score (0-100); scores >=65 map to bullish, <=35 to bearish, and scores between them to neutral",
     )
     score_breakdown: dict[str, int] = Field(
         default_factory=dict,
